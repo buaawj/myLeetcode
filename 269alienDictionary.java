@@ -23,68 +23,148 @@ return an empty string. There may be multiple valid order of letters, return any
 
 public class Solution {
 
-	public  String alienOrder(String[] words)
-		{
-			Map<Character, Set<Character>> graph = new HashMap<>();
+	public String alienOrder(String[] words) {
+			 int n = words.length;
+			 Map<Character, Set<Character>> graph = new HashMap<>();
+			 Set<Character> allchars = new HashSet<>();
+			 Map<Character, Integer> indegree = new HashMap<>();
 
-			for(int i=1; i<words.length; ++i)
-			{
-				String word1 = words[i-1];
-				String word2 = words[i];
-				int len = Math.min(word1.length(), word2.length());
-				for(int j=0; j<len; ++j)
-				{
-					char s = word1.charAt(j);
-					char v = word2.charAt(j);
+			 for(String word : words)
+			 {
+					 for(char ch : word.toCharArray())
+					 {
+							 allchars.add(ch);
+							 indegree.putIfAbsent(ch, 0);
+					 }
+			 }
 
-					if(s==v)
-						continue;
-					if(!graph.containsKey(s))
-						graph.put(s, new HashSet<Character>());
-					graph.get(s).add(v);
-				}
-			}
+			 for(int i=1; i<n; ++i)
+			 {
+				 String s = words[i-1];
+				 String v = words[i];
 
-			Map<Character, Integer> indegree = new HashMap<>();
-			for(Character key: graph.keySet())
-			{
-				if(!indegree.containsKey(key))
-				{
-					indegree.put(key, 0);
-				}
-				for(Character ch: graph.get(key))
-					indegree.put(ch, indegree.getOrDefault(ch, 0)+1);
-			}
+				 for(int j=0; j<Math.min(s.length(), v.length()); ++j)
+				 {
+					 if(s.charAt(j)==v.charAt(j))
+						 continue;
+					 if(!graph.containsKey(s.charAt(j)))
+					 {
+						 graph.put(s.charAt(j), new HashSet<>());
+						 }
 
-			Queue<Character> queue = new LinkedList<>();
-			for(Character key : indegree.keySet())
-			{
-				if(indegree.get(key)==0)
-					queue.offer(key);
-			}
+					 graph.get(s.charAt(j)).add(v.charAt(j));
+							 break;
+					 }
+			 }
 
-			StringBuilder sBuilder = new StringBuilder();
-			while(!queue.isEmpty())
-			{
-				Character node = queue.poll();
-				sBuilder.append(node);
-				if(graph.containsKey(node))
-				{
-					for(Character v : graph.get(node))
-					{
-						indegree.put(v, indegree.get(v)-1);
-						if( indegree.get(v)==0)
-							queue.offer(v);
-					}
-				}
+			 for(char key : graph.keySet())
+			 {
+				 for(char neighbor : graph.get(key))
+					 indegree.put(neighbor, 1+indegree.getOrDefault(neighbor, 0));
+			 }
 
-			}
+			 Queue<Character> queue = new LinkedList<>();
+			 for(char key : indegree.keySet())
+			 {
+				 if(indegree.get(key)==0)
+					 queue.offer(key);
+			 }
 
-			return queue.isEmpty() ? sBuilder.toString() : "";
+			 StringBuilder ret = new StringBuilder();
+			 while(!queue.isEmpty())
+			 {
+				 char ch = queue.poll();
+				 ret.append(ch);
 
-		}
+					 if(graph.containsKey(ch))
+					 {
+							 for(char neighbor : graph.get(ch))
+					 {
+						 indegree.put(neighbor, indegree.get(neighbor)-1);
+						 if(indegree.get(neighbor)==0)
+							 queue.offer(neighbor);
+					 }
+					 }
+			 }
 
+			 // Bug: here it should not check queue.size()!=0
+			 return ret.length() !=allchars.size() ? "" : ret.toString();
+	 }
+}
 
+// dfs:
+
+class Solution {
+    public String alienOrder(String[] words) {
+        int n = words.length;
+        Map<Character, Set<Character>> graph = new HashMap<>();
+        Set<Character> allchars = new HashSet<>();
+
+        for(String word : words)
+        {
+            for(char ch : word.toCharArray())
+            {
+                allchars.add(ch);
+            }
+        }
+
+        for(int i=1; i<n; ++i)
+        {
+        	String s = words[i-1];
+        	String v = words[i];
+
+        	for(int j=0; j<Math.min(s.length(), v.length()); ++j)
+        	{
+        		if(s.charAt(j)==v.charAt(j))
+        			continue;
+    		    if(!graph.containsKey(s.charAt(j)))
+    		    {
+    			    graph.put(s.charAt(j), new HashSet<>());
+        	    }
+
+    		    graph.get(s.charAt(j)).add(v.charAt(j));
+                break;
+            }
+        }
+
+        Stack<Character> res = new Stack<>();
+        Set<Character> path = new HashSet<>();
+        Map<Character, Boolean>visited = new HashMap<>();
+
+        for(char s : allchars)
+            if (!visited.containsKey(s) && dfs(graph, visited, res, path, s))
+            return "";
+        StringBuilder ret = new StringBuilder();
+        while(!res.isEmpty())
+            ret.append(res.pop());
+        return ret.length() !=allchars.size() ? "" : ret.toString();
+    }
+
+    boolean dfs(Map<Character, Set<Character>> graph, Map<Character, Boolean>visited, Stack<Character> res, Set<Character> path, char s)
+    {
+        visited.put(s, true);
+        path.add(s);
+
+        if(graph.containsKey(s))
+        {
+            for(char neighbor : graph.get(s))
+            {
+                if(!visited.containsKey(neighbor))
+                {
+                	if(dfs(graph, visited, res, path, neighbor))
+                		return true;
+                }
+                else if(path.contains(neighbor))
+                {
+                    return true;
+                }
+            }
+        }
+
+        path.remove(s);
+        res.push(s);
+        return false;
+    }
 }
 
 

@@ -124,6 +124,24 @@ int shortestDistanceIII(vector<string> &words, string &word1, string &word2)
     return shortest;
 }
 
+    public int shortestWordDistance(String[] words, String word1, String word2) {
+         int idx = -1, ret = Integer.MAX_VALUE;
+        for(int i=0; i<words.length; ++i)
+        {
+            if(words[i].equals(word1) || words[i].equals(word2))
+            {
+                if(idx!=-1 && (word1.equals(word2) || !words[i].equals(words[idx])))
+                {
+                    ret = Math.min(ret, i-idx);
+                }
+                
+                idx = i;
+            }
+        }
+        
+        return ret;
+    }
+
 bool canFinish(int numCourses, vector<pair<int, int>>& prerequisites) {
     unordered_map<int, vector<int>>graph;
     for(auto &p: prerequisites)

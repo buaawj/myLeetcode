@@ -7,6 +7,46 @@
  *     Interval(int s, int e) { start = s; end = e; }
  * }
  */
+ class SummaryRanges {
+
+    TreeMap<Integer, Integer> rangeMap = new TreeMap<>();
+    /** Initialize your data structure here. */
+    public SummaryRanges() {
+        
+    }
+    
+    public void addNum(int val) {
+        Integer floor = rangeMap.floorKey(val);
+        if(floor!=null && rangeMap.get(floor)+1>val)
+            return;
+        if(floor!=null && rangeMap.get(floor)+1==val)
+            rangeMap.put(floor, val);
+        else
+        {
+            floor = val;
+            rangeMap.put(val, val);
+        }
+        
+        if(rangeMap.containsKey(val+1))
+        {
+            rangeMap.put(floor, rangeMap.get(val+1));
+            rangeMap.remove(val+1);
+        }
+            
+    }
+    
+    public List<Interval> getIntervals() {
+        List<Interval> res = new ArrayList<>();
+        for(Map.Entry<Integer, Integer> entry : rangeMap.entrySet()){ 
+            res.add(new Interval(entry.getKey(), entry.getValue())); 
+        }
+        return res;    
+    }
+}
+ 
+ 
+ 
+ /////////////////////////////////////////
 class SummaryRanges {
 
     class BSTNode {

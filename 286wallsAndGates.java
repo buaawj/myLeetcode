@@ -30,7 +30,7 @@ public class Solution {
 								for(int j=0; j<n; ++j)
 								{
 									if(rooms[i][j]==0)
-										q.offer(i*m+j);
+										q.offer(i*n+j);
 								}
 							}
 
@@ -38,8 +38,8 @@ public class Solution {
 							while(!q.isEmpty())
 							{
 								int first = q.poll();
-								int x = first/m;
-								int y = first%m;
+								int x = first/n;
+								int y = first%n;
 								for(int i=0; i<4; ++i)
 								{
 									int newx = x+dir[i][0], newy = y+dir[i][1];
@@ -49,7 +49,7 @@ public class Solution {
 									}
 
 									rooms[newx][newy] = rooms[x][y]+1;
-									q.offer(newx*m + newy);
+									q.offer(newx*n + newy);
 								}
 							}
 	}

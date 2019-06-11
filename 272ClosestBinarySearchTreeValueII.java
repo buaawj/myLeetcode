@@ -72,7 +72,7 @@ public  List<Integer> closestKValues(TreeNode root, double target, int k) {
 	  }
   }
 
-      void getSuccessor(Stack<TreeNode> suc)
+   void getSuccessor(Stack<TreeNode> suc)
   {
 	  TreeNode node = suc.pop();
 	  if(node.right!=null)

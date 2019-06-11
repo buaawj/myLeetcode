@@ -48,6 +48,54 @@ return its vertical order traversal as:
 
  */
 
+class Solution {
+    class Node
+    {
+        TreeNode node;
+        int depth;
+        Node(TreeNode node, int depth)
+        {
+            this.node = node;
+            this.depth = depth;
+        }
+    }
+    public List<List<Integer>> verticalOrder(TreeNode root) {
+        List<List<Integer>> ret = new ArrayList<>();
+        if(root == null)
+            return ret;
+        Map<Integer, List<Integer>> map  = new TreeMap<>();
+        Queue<Node> queue = new LinkedList<>();
+        queue.offer(new Node(root, 0));
+        
+        while(!queue.isEmpty())
+        {
+            Node node = queue.poll();
+            TreeNode cur = node.node;
+            int width = node.depth;
+            map.putIfAbsent(width, new ArrayList<>());
+            map.get(width).add(cur.val);
+            
+            if(cur.left !=null)
+            {
+                queue.offer(new Node(cur.left, width-1));
+            }
+            
+            if(cur.right !=null)
+            {
+                queue.offer(new Node(cur.right, width+1));
+            } 
+        }
+               
+        for(int key : map.keySet())
+        {
+            ret.add(map.get(key));
+        }
+        
+        return ret;
+    }
+}
+
+
 public class Solution {
 
 	 public static List<List<Integer>> verticalOrder(TreeNode root) 

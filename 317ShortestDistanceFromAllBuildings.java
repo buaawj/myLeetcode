@@ -88,7 +88,9 @@ public class Solution {
 								visited[newx][newy]=true;
 								dist[newx][newy] += depth+1; 
 								queue.offer(newx*n+newy);
-								reach[newx][newy] = housenum;
+								//Bug: reach[newx][newy] = housenum; If there is building, it is all blocked by 2. In this case
+                                //this building will not be visiting by housenum times. 
+                                ++reach[newx][newy];
 							}
 						}
 						

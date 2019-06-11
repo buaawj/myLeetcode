@@ -72,6 +72,98 @@ Special thanks to @elmirap for adding this problem and creating all test cases.
 
          return sb.toString();
      }
+	 
+	 
+	 
+	 class Solution {
+    class Node
+    {
+        int cnt;
+        char ch;
+        Node(int cnt, char ch)
+        {
+            this.cnt = cnt;
+            this.ch = ch;
+        }
+    }
+    public String rearrangeString(String s, int k) {
+        if (s == null || s.length() == 0 || k <= 0) return s;
+        Map<Character, Integer> count = new HashMap<>();
+        //Bug: need to rerange the sort funciton:
+        // PriorityQueue<Node> queue = new PriorityQueue<>((a, b)-> b.cnt-a.cnt);
+        PriorityQueue<Node> queue = new PriorityQueue<>((a, b)-> a.cnt != b.cnt ? b.cnt - a.cnt : a.ch - b.ch);
+
+        for(int i=0; i<s.length(); ++i)
+        {
+            count.put(s.charAt(i), count.getOrDefault(s.charAt(i), 0)+1);
+        }
+        for(char ch : count.keySet())
+            queue.add(new Node(count.get(ch), ch));
+        
+        StringBuilder sb = new StringBuilder();
+        int len = s.length();
+        while(!queue.isEmpty())
+        {
+            List<Node> temp = new ArrayList<>();
+            int loop = Math.min(k, len);
+            for(int i=0; i<loop; ++i)
+            {
+                if(queue.isEmpty()) return "";
+                Node node = queue.poll();
+                sb.append(node.ch);
+                if(--node.cnt >0) temp.add(node);
+                --len;
+            }
+            
+            for(Node node : temp) queue.add(node);
+        }
+        
+        return sb.toString();
+    }
+}
+??????????????????????????????????????????
+
+class Solution {
+    
+            //先记录str中的char及它出现在次数，存在count[]里，用valid[]来记录这个char最小出现的位置。
+    //每一次把count值最大的数选出来，append到新的string后面
+    public int selectedValue(int[] count, int[] valid, int i) {
+        int select = Integer.MIN_VALUE;
+        int val = -1;
+        for (int j = 0; j < count.length; j++) {
+            if (count[j] > 0 && i >= valid[j] && count[j] > select) {
+                select = count[j];
+                val = j;
+            }
+        }
+        return val;
+    }
+
+    
+    public String rearrangeString(String str, int k) {
+        int[] count = new int[26];
+        int[] valid = new int[26];
+        //把每个出现了的char的个数记下来
+        for (char c : str.toCharArray()) {
+            count[c - 'a']++;
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < str.length(); i++) {
+            //选出剩下需要出现次数最多又满足条件的字母，即是我们最应该先放的数
+            int curt = selectedValue(count, valid, i);
+            //如果不符合条件，返回“”
+            if (curt == -1) return "";
+            //选择好后，count要减少，valid要到下一个k distance之后
+            count[curt]--;
+            valid[curt] = i + k;
+            sb.append((char)('a' + curt));
+        }
+        
+        return sb.toString();
+    }
+
+}
      
 
 

@@ -1,126 +1,59 @@
 import java.util.ArrayList;
 
 /*
-A group of friends went on holiday and sometimes lent each other money. For example, Alice paid for Bill's lunch for $10. Then later Chris gave Alice $5 for a taxi ride. We can model each transaction as a tuple (x, y, z) which means person x gave person y $z. Assuming Alice, Bill, and Chris are person 0, 1, and 2 respectively (0, 1, 2 are the person's ID), the transactions can be represented as [[0, 1, 10], [2, 0, 5]].
+There is a ball in a maze with empty spaces and walls. The ball can go through empty spaces by rolling up, down, left or right, but it won't stop rolling until hitting a wall. When the ball stops, it could choose the next direction.
 
-Given a list of transactions between a group of people, return the minimum number of transactions required to settle the debt.
+Given the ball's start position, the destination and the maze, find the shortest distance for the ball to stop at the destination. The distance is defined by the number of empty spaces traveled by the ball from the start position (excluded) to the destination (included). If the ball cannot stop at the destination, return -1.
 
-Note:
-
-A transaction will be given as a tuple (x, y, z). Note that x ≠ y and z > 0.
-Person's IDs may not be linear, e.g. we could have the persons 0, 1, 2 or we could also have the persons 0, 2, 6
-
-Input:
-[[0,1,10], [2,0,5]]
-
-Output:
-2
-
-Explanation:
-Person #0 gave person #1 $10.
-Person #2 gave person #0 $5.
-
-Two transactions are needed. One way to settle the debt is person #1 pays person #0 and #2 $5 each.
-
-Input:
-[[0,1,10], [1,0,1], [1,2,5], [2,0,5]]
-
-Output:
-1
-
-Explanation:
-Person #0 gave person #1 $10.
-Person #1 gave person #0 $1.
-Person #1 gave person #2 $5.
-Person #2 gave person #0 $5.
-
-Therefore, person #1 only need to give person #0 $4, and all debt is settled.
-
+The maze is represented by a binary 2D array. 1 means the wall and 0 means the empty space. You may assume that the borders of the maze are all walls. The start and destination coordinates are represented by row and column indexes.
  */
-dp:
 
-public static int minTransfers(int[][] transactions) {
-	        Map<Integer, Integer> debt = new HashMap<>();
-	        for (int[] t : transactions) {
-	            debt.put(t[0], debt.getOrDefault(t[0], 0) - t[2]);
-	            debt.put(t[1], debt.getOrDefault(t[1], 0) + t[2]);
-	        }
-
-	        int[] account = new int[debt.size()];
-	        int len = 0;
-	        for (int v : debt.values()) {
-	            if (v != 0) {
-	                account[len++] = v;
-	            }
-	        }
-
-	        if (len == 0) {
-	            return 0;
-	        }
-
-	        int[] dp = new int[1 << len];
-	        Arrays.fill(dp, Integer.MAX_VALUE/2 - 1);
-	        for (int i = 1;i < dp.length;i++) { // go through all the subsets
-	            int sum = 0, count = 0;
-	            for (int j = 0; j < len; j++) {
-	                if (((1 << j) & i) != 0) { // this subset has jth person
-	                    sum += account[j];
-	                    count++;               // minimum transactions to balance accounts
-	                }
-	            }
-
-	            if (sum == 0) { // if balance = 0, it is a subse problem
-	                dp[i] = count - 1;
-	                for (int j = 1; j < i; j++) {
-	                    if (((i & j) == j) && dp[j] + dp[i-j] < dp[i]) {
-	                        dp[i] = dp[j] + dp[i-j];
-	                    }
-	                }
-	            }
-	        }
-
-	        return dp[dp.length - 1];
-	    }
-
-??????????????????????????????????????????????????????????????????????????????????
-dfs:
-
-public int minTransfers(int[][] transactions) {
-        Map<Integer, Integer> map = new HashMap<>();
-        for(int[] trans : transactions)
+class Solution {
+    public int shortestDistance(int[][] maze, int[] start, int[] destination) {
+        Queue<int[]> queue = new LinkedList<>();
+        
+        int m = maze.length, n = maze[0].length;
+        int[][] dist = new int[m][n];
+        queue.offer(new int[] {start[0],start[1]});
+        for(int i=0; i<m; ++i)
         {
-        	map.put(trans[0], trans[2]+map.getOrDefault(trans[0], 0));
-        	map.put(trans[1], -trans[2]+map.getOrDefault(trans[1], 0));
+        	for(int j=0; j<n; ++j)
+        		dist[i][j] = Integer.MAX_VALUE;
         }
+        
+        dist[start[0]][start[1]]=0;
+        int[][] dirs = new int[][] {{-1, 0}, {1, 0}, {0,1}, {0,-1}};
+        while(!queue.isEmpty())
+        {            
+        	int[] front = queue.poll();
+        	for(int[] dir : dirs)
+        	{
+            	int x = front[0], y = front[1];
+            	int dist1 = dist[front[0]][front[1]];
 
-        List<Integer> accnt = new ArrayList<>();
-        for(int key : map.keySet())
-        {
-            int balance = map.get(key);
-            if(balance !=0)
-                accnt.add(balance);
+        		while(x>=0&&x<m&&y>=0&&y<n && maze[x][y]==0)
+        		{
+        			x += dir[0];
+        			y += dir[1];
+        			++dist1;
+        		}
+        		
+        		x-=dir[0];
+        		y-=dir[1];
+        		--dist1;
+        		if(dist[x][y] > dist1)
+        		{
+        			dist[x][y] = dist1;
+        			if(x!=destination[0] || y!=destination[1] )
+        				queue.offer(new int[] {x, y});
+        		}
+        	}
         }
-
-        return helper(accnt, 0, 0);
+        
+        return dist[destination[0]][destination[1]]==Integer.MAX_VALUE ? -1 :dist[destination[0]][destination[1]] ;
     }
-
-    int helper(List<Integer> accnt, int start, int count)
-    {
-        int ret = Integer.MAX_VALUE, n=accnt.size();
-        while(start<n && accnt.get(start)==0) ++start;
-
-        for(int i=start+1; i<n; ++i)
-        {
-            if( ((accnt.get(start) <0 ) ^ (accnt.get(i)<0)))
-            {
-                accnt.set(i, accnt.get(i)+accnt.get(start));
-                ret = Math.min(ret, helper(accnt, start+1, count+1));
-                accnt.set(i, accnt.get(i)-accnt.get(start));
-            }
-        }
-
-        return ret == Integer.MAX_VALUE ? count : ret;
-    }
+    
+}
 
 
 
